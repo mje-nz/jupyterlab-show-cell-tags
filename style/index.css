@@ -1,0 +1,8 @@
+.jupyterlab-show-cell-tags {
+    position: absolute;
+    z-index: 1;
+    top: var(--jp-code-padding);
+    right: var(--jp-code-padding);
+    color: var(--jp-mirror-editor-comment-color);
+    opacity: 75%;
+}
