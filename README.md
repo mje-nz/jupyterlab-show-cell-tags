@@ -1,20 +1,26 @@
 # jupyterlab-show-cell-tags
-
 ![Github Actions Status](https://github.com/mje-nz/jupyterlab-show-cell-tags/workflows/Build/badge.svg)
 
 Show cell tags in the JupyterLab notebook interface.
 
 ![Screenshot](docs/tagged-cell.png)
 
-## Requirements
 
+## Requirements
 * JupyterLab >= 2.0
 
-## Install
 
+## Install
 ```bash
-jupyter labextension install jupyterlab-show-cell-tags
+jupyter labextension install @mje-nz/jupyterlab-show-cell-tags
 ```
+
+
+## Uninstall
+```bash
+jupyter labextension uninstall @mje-nz/jupyterlab-show-cell-tags
+```
+
 
 ## Contributing
 To set up for development:
@@ -49,9 +55,3 @@ jupyter lab --watch
 
 Now every change will be built locally and bundled into JupyterLab.
 Be sure to refresh your browser page after saving file changes to reload the extension (note: you'll need to wait for webpack to finish, which can take 10s+ at times).
-
-To uninstall the extension:
-
-```bash
-jupyter labextension uninstall jupyterlab-show-cell-tags
-```
