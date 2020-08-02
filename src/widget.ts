@@ -63,7 +63,7 @@ export default class CellTagsWidget extends Widget {
     const cell = this._panel.content.widgets.find(
       (widget: Cell) => widget.model === cellModel
     );
-    return cell.inputArea.node;
+    return cell?.inputArea?.node;
   }
 
   /**
@@ -91,7 +91,7 @@ export default class CellTagsWidget extends Widget {
    */
   private _removeCellTagsNode(cellModel: ICellModel) {
     const inputAreaNode = this._findInputAreaNodeForCell(cellModel);
-    const cellTagsNode = inputAreaNode.querySelector(`.${CELL_TAGS_CLASS}`);
+    const cellTagsNode = inputAreaNode?.querySelector(`.${CSS_CLASS}`);
     if (cellTagsNode) {
       cellTagsNode.remove();
     }
