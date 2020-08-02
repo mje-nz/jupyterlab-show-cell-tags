@@ -9,8 +9,10 @@ import {
 } from '@jupyterlab/observables';
 import { Cell, ICellModel } from '@jupyterlab/cells';
 
-export const CELL_TAGS_CLASS = 'jupyterlab-show-cell-tags';
+const CSS_CLASS = 'jp-celltagswidget';
+const CSS_CLASS_TAGS = 'jp-celltagswidget-tags';
 
+// TODO: this isn't really a widget
 export default class CellTagsWidget extends Widget {
   constructor(panel: NotebookPanel) {
     super();
@@ -72,19 +74,25 @@ export default class CellTagsWidget extends Widget {
    */
   private _createOrUpdateCellTagsNode(cellModel: ICellModel, text: string) {
     const inputAreaNode = this._findInputAreaNodeForCell(cellModel);
-    let cellTagsNode: HTMLDivElement = inputAreaNode.querySelector(
-      `.${CELL_TAGS_CLASS}`
-    );
-    if (!cellTagsNode) {
-      cellTagsNode = document.createElement('div') as HTMLDivElement;
-      cellTagsNode.className = CELL_TAGS_CLASS;
-      inputAreaNode.append(cellTagsNode);
-    }
+    if (inputAreaNode) {
+      let cellTagsNode: HTMLDivElement = inputAreaNode.querySelector(
+        `.${CSS_CLASS_TAGS}`
+      );
+      if (!cellTagsNode) {
+        const containerNode = document.createElement('div');
+        containerNode.className = CSS_CLASS;
+        inputAreaNode.append(containerNode);
+        cellTagsNode = document.createElement('div');
+        cellTagsNode.className = CSS_CLASS_TAGS;
+        containerNode.append(cellTagsNode);
+      }
 
-    if (cellTagsNode.innerText !== text) {
-      cellTagsNode.innerText = text;
+      if (cellTagsNode.innerText !== text) {
+        cellTagsNode.innerText = text;
+      }
     }
   }
+
   /**
    * Delete the node which displays the cell tags for the cell with the given
    * model.
