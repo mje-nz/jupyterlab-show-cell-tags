@@ -1,128 +1,47 @@
-import { each } from '@lumino/algorithm';
 import { Widget } from '@lumino/widgets';
 import { JSONExt, JSONObject } from '@lumino/coreutils';
-import { NotebookPanel } from '@jupyterlab/notebook';
-import {
-  IObservableJSON,
-  IObservableList,
-  IObservableUndoableList
-} from '@jupyterlab/observables';
-import { Cell, ICellModel } from '@jupyterlab/cells';
+import { Cell } from '@jupyterlab/cells';
 
 const CSS_CLASS = 'jp-celltagswidget';
 const CSS_CLASS_TAGS = 'jp-celltagswidget-tags';
 
-// TODO: this isn't really a widget
-export default class CellTagsWidget extends Widget {
-  constructor(panel: NotebookPanel) {
+/** Widget which displays the cell tags for a cell in the corner of the input
+ * area.
+ */
+export class CellTagsWidget extends Widget {
+  constructor(cell: Cell) {
     super();
-    this._panel = panel;
-    const cells = this._panel.context.model.cells;
-    cells.changed.connect((cells, changed) => {
-      this.updateConnectedCell(cells, changed);
-    });
-    each(cells, cell => this._registerMetadataChanges(cell));
+    this._cell = cell;
+
+    this.node.className = CSS_CLASS;
+    const tagsNode = document.createElement('div');
+    tagsNode.className = CSS_CLASS_TAGS;
+    this.node.append(tagsNode);
+
+    this._cell.model.metadata.changed.connect(this.update, this);
+    this.update();
   }
 
-  updateConnectedCell(
-    cells: IObservableUndoableList<ICellModel>,
-    changed: IObservableList.IChangedArgs<ICellModel>
-  ) {
-    changed.oldValues.forEach(cm => this._deregisterMetadataChanges(cm));
-    changed.newValues.forEach(cm => this._registerMetadataChanges(cm));
-  }
-
-  /**
-   * Connect a handler for metadata changes to the given cell model, and update
-   * the corresponding cell to display its tags.
-   */
-  private _registerMetadataChanges(cellModel: ICellModel) {
-    if (!(cellModel.id in this._cellSlotMap)) {
-      const fn = (): void => this._updateCell(cellModel);
-      cellModel.metadata.changed.connect(fn);
-      this._cellSlotMap[cellModel.id] = fn;
-      this._updateCell(cellModel);
+  dispose() {
+    if (this.isDisposed) {
+      return;
     }
+    this._cell.model.metadata.changed.disconnect(this.update, this);
+    this._cell = null;
+    super.dispose();
   }
 
-  /**
-   * Remove the handler for metadata changes to the given cell model, and remove
-   * the cell tag display from the corresponding cell.
-   */
-  private _deregisterMetadataChanges(cellModel: ICellModel) {
-    const fn = this._cellSlotMap[cellModel.id];
-    if (fn) {
-      cellModel.metadata.changed.disconnect(fn);
-      this._removeCellTagsNode(cellModel);
-    }
-    delete this._cellSlotMap[cellModel.id];
-  }
-
-  /**
-   * Find the input area for the cell with the given model.
-   */
-  private _findInputAreaNodeForCell(cellModel: ICellModel): HTMLElement | null {
-    const cell = this._panel.content.widgets.find(
-      (widget: Cell) => widget.model === cellModel
-    );
-    return cell?.inputArea?.node;
-  }
-
-  /**
-   * Create or update the node which displays the cell tags for the cell with
-   * the given model.
-   */
-  private _createOrUpdateCellTagsNode(cellModel: ICellModel, text: string) {
-    const inputAreaNode = this._findInputAreaNodeForCell(cellModel);
-    if (inputAreaNode) {
-      let cellTagsNode: HTMLDivElement = inputAreaNode.querySelector(
-        `.${CSS_CLASS_TAGS}`
-      );
-      if (!cellTagsNode) {
-        const containerNode = document.createElement('div');
-        containerNode.className = CSS_CLASS;
-        inputAreaNode.append(containerNode);
-        cellTagsNode = document.createElement('div');
-        cellTagsNode.className = CSS_CLASS_TAGS;
-        containerNode.append(cellTagsNode);
-      }
-
-      if (cellTagsNode.innerText !== text) {
-        cellTagsNode.innerText = text;
-      }
-    }
-  }
-
-  /**
-   * Delete the node which displays the cell tags for the cell with the given
-   * model.
-   */
-  private _removeCellTagsNode(cellModel: ICellModel) {
-    const inputAreaNode = this._findInputAreaNodeForCell(cellModel);
-    const cellTagsNode = inputAreaNode?.querySelector(`.${CSS_CLASS}`);
-    if (cellTagsNode) {
-      cellTagsNode.remove();
-    }
-  }
-
-  /**
-   * Update the cell with the given model so it displays its cell tags.
-   */
-  private _updateCell(cellModel: ICellModel) {
-    const tags = cellModel.metadata.get('tags') as JSONObject;
+  update() {
+    const tags = this._cell.model.metadata.get('tags') as JSONObject;
+    let text = '';
     if (tags && JSONExt.isArray(tags)) {
-      const text = tags.map(t => '[' + t + ']').join(' ');
-      this._createOrUpdateCellTagsNode(cellModel, text);
-    } else {
-      this._removeCellTagsNode(cellModel);
+      text = tags.map(t => '[' + t + ']').join(' ');
+    }
+    const node = this.node.firstChild as HTMLElement;
+    if (node.innerText !== text) {
+      node.innerText = text;
     }
   }
 
-  private _cellSlotMap: {
-    [id: string]: (
-      sender: IObservableJSON,
-      args: IObservableJSON.IChangedArgs
-    ) => void;
-  } = {};
-  private _panel: NotebookPanel;
+  private _cell: Cell;
 }
