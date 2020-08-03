@@ -1,6 +1,6 @@
 {
   "name": "@mje-nz/jupyterlab-show-cell-tags",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Show cell tags in the Jupyter Lab notebook interface.",
   "keywords": [
     "jupyter",
