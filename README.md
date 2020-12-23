@@ -55,3 +55,7 @@ jupyter lab --watch
 
 Now every change will be built locally and bundled into JupyterLab.
 Be sure to refresh your browser page after saving file changes to reload the extension (note: you'll need to wait for webpack to finish, which can take 10s+ at times).
+
+
+## Related projects
+See also [fcollonval/jlab-enhanced-cell-toolbar](https://github.com/fcollonval/jlab-enhanced-cell-toolbar), which is like this but probably better.
